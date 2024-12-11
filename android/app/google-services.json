@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "139160455468",
+    "project_id": "iprasad-notes-flutter-firebase",
+    "storage_bucket": "iprasad-notes-flutter-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:139160455468:android:a9536f91a2bb4787640489",
+        "android_client_info": {
+          "package_name": "com.iprasad.notes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBqqNvjeyKH3BRlk-kl671rqf-amPL9lw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
