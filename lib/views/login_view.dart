@@ -28,7 +28,9 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login'),),
+      appBar: AppBar(
+        title: const Text('Login'),
+      ),
       body: Column(
           children: [
             TextField(
@@ -54,11 +56,10 @@ class _LoginViewState extends State<LoginView> {
                 final email = _email.text;
                 final password = _password.text;
               try {
-                  final userCredential =  await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  final user =  await FirebaseAuth.instance.signInWithEmailAndPassword(
                     email: email, 
                     password: password
                   );
-                  print(userCredential);
                 } on FirebaseAuthException catch (e) {
                   switch(e.code) {
                     case 'user-not-found':
@@ -72,8 +73,14 @@ class _LoginViewState extends State<LoginView> {
               }, 
               child: const Text("Login")
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushNamedAndRemoveUntil('/register/', (route) => false);
+              }, 
+              child: const Text("Not registered yet? Register here!")
+            ),
           ],
-        )
+        ),
     );
   }
 }
