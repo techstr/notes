@@ -9,21 +9,20 @@ import 'views/notes_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const HomePage(),
-      routes: {
-        '/login/': (context) => const LoginView(),
-        '/register/': (context) => const RegisterView(),
-        '/verify/': (context) => const VerifyEmailView(),
-      },
-    )
-  );
+  runApp(MaterialApp(
+    title: 'Flutter Demo',
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      useMaterial3: true,
+    ),
+    home: const HomePage(),
+    routes: {
+      '/login/': (context) => const LoginView(),
+      '/register/': (context) => const RegisterView(),
+      '/verify/': (context) => const VerifyEmailView(),
+      '/notes/': (context) => const NotesView(),
+    },
+  ));
 }
 
 class HomePage extends StatelessWidget {
@@ -36,10 +35,10 @@ class HomePage extends StatelessWidget {
           options: DefaultFirebaseOptions.currentPlatform,
         ),
         builder: (context, snapshot) {
-          switch (snapshot.connectionState){
+          switch (snapshot.connectionState) {
             case ConnectionState.done:
               final user = FirebaseAuth.instance.currentUser;
-              if(user != null) {
+              if (user != null) {
                 if (user.emailVerified) {
                   return const NotesView();
                 } else {
@@ -51,7 +50,6 @@ class HomePage extends StatelessWidget {
             default:
               return const CircularProgressIndicator();
           }
-        }
-      );
+        });
   }
 }

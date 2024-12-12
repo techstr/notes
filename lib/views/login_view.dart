@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:developer' as devtools show log;
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -20,11 +21,12 @@ class _LoginViewState extends State<LoginView> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,36 +34,34 @@ class _LoginViewState extends State<LoginView> {
         title: const Text('Login'),
       ),
       body: Column(
-          children: [
-            TextField(
+        children: [
+          TextField(
               controller: _email,
               enableSuggestions: true,
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: 'Enter your email'
-              )
-            ),
-            TextField(
+              decoration: const InputDecoration(hintText: 'Enter your email')),
+          TextField(
               controller: _password,
               obscureText: true,
               enableSuggestions: true,
               autocorrect: false,
               decoration: const InputDecoration(
                 hintText: 'Enter your password',
-              )
-            ),
-            TextButton(
+              )),
+          TextButton(
               onPressed: () async {
                 final email = _email.text;
                 final password = _password.text;
-              try {
+                try {
                   await FirebaseAuth.instance.signInWithEmailAndPassword(
-                    email: email, 
-                    password: password
+                    email: email,
+                    password: password,
                   );
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/notes/', (route) => false);
                 } on FirebaseAuthException catch (e) {
-                  switch(e.code) {
+                  switch (e.code) {
                     case 'user-not-found':
                       devtools.log("User not found");
                     case 'invalid-credential':
@@ -70,17 +70,18 @@ class _LoginViewState extends State<LoginView> {
                       devtools.log(e.code);
                   }
                 }
-              }, 
-              child: const Text("Login")
-            ),
-            TextButton(
+              },
+              child: const Text("Login")),
+          TextButton(
               onPressed: () {
-                Navigator.of(context).pushNamedAndRemoveUntil('/register/', (route) => false);
-              }, 
-              child: const Text("Not registered yet? Register here!")
-            ),
-          ],
-        ),
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/register/',
+                  (route) => false,
+                );
+              },
+              child: const Text("Not registered yet? Register here!")),
+        ],
+      ),
     );
   }
 }
