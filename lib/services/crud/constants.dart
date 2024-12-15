@@ -8,18 +8,16 @@ const noteTable = "note";
 const userTable = "user";
 const createUserTable = '''
   CREATE TABLE IF NOT EXISTS "user" (
-    "id" INTEGER NOT NULL,
-    "email" TEXT NOT NULL,
-    PRIMARY KEY("id", AUTOINCREMENT)
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "email" TEXT NOT NULL
   )
 ''';
 
 const createNotesTable = '''
   CREATE TABLE IF NOT EXISTS "note" (
-    "id" INTEGER NOT NULL,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "user_id" INTEGER NOT NULL,
     "text" TEXT,
-    "is_synced_with_cloud" INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY("id", AUTOINCREMENT)
+    "is_synced_with_cloud" INTEGER NOT NULL DEFAULT 0
   )
 ''';
