@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:notes/extensions/list/filter.dart';
 import 'package:notes/services/crud/constants.dart';
 import 'package:notes/services/crud/crud_exception.dart';
 import 'package:sqflite/sqflite.dart';
@@ -10,39 +11,51 @@ import 'package:path/path.dart' show join;
 
 class NotesService {
   Database? _db;
+  DatabaseUser? _user;
 
   List<DatabaseNote> _notes = [];
 
   // Singleton construction
   static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
+  NotesService._sharedInstance() {
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      },
+    );
+  }
   factory NotesService() => _shared;
 
-  final _notesStreamController =
-      StreamController<List<DatabaseNote>>.broadcast();
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeReadingAllNotesException;
+        }
+      });
 
-  Future<void> _cacheNotes() async {
-    final allNotes = await getAllNotes();
-    _notes = allNotes.toList();
-    _notesStreamController.add(_notes);
-  }
-
-  Future<void> _ensureDbIsOpen() async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
-      await open();
-    } on DatabaseAlreadyOpenException catch (_) {
-      //empty
-    }
-  }
-
-  Database _getDatabaseOrThrow() {
-    final db = _db;
-    if (db == null) {
-      throw DatabaseNotOpenException();
-    } else {
-      return db;
+      final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
+      return user;
+    } on UserNotFoundException catch (_) {
+      final createdUser = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
+      return createdUser;
+    } catch (_) {
+      rethrow;
     }
   }
 
@@ -73,21 +86,14 @@ class NotesService {
       throw UserAlreadyExistsException();
     }
 
-    final id = await db.insert(userTable, {emailColumn: email.toLowerCase()});
+    final id = await db.insert(userTable, {
+      emailColumn: email.toLowerCase(),
+    });
 
-    return DatabaseUser(id: id, email: email);
-  }
-
-  Future<DatabaseUser> getOrCreateUser({
-    required String email,
-  }) {
-    try {
-      return getUser(email: email);
-    } on UserNotFoundException catch (_) {
-      return createUser(email: email);
-    } catch (_) {
-      rethrow;
-    }
+    return DatabaseUser(
+      id: id,
+      email: email,
+    );
   }
 
   Future<DatabaseUser> getUser({required String email}) async {
@@ -95,11 +101,12 @@ class NotesService {
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
+      limit: 1,
       where: 'email = ?',
       whereArgs: [email.toLowerCase()],
     );
 
-    if (results.isNotEmpty) {
+    if (results.isEmpty) {
       throw UserNotFoundException();
     } else {
       return DatabaseUser.fromRow(results.first);
@@ -137,7 +144,7 @@ class NotesService {
     final db = _getDatabaseOrThrow();
     final dbUser = await getUser(email: owner.email);
     if (dbUser != owner) {
-      throw UserNotFoundException();
+      throw UserDoesNotMatchFoundException();
     }
 
     const text = '';
@@ -166,10 +173,15 @@ class NotesService {
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
 
-    final updateCount = await db.update(noteTable, {
-      textColumn: text,
-      isSyncedWithCloudColumn: 0,
-    });
+    final updateCount = await db.update(
+      noteTable,
+      {
+        textColumn: text,
+        isSyncedWithCloudColumn: 0,
+      },
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
     if (updateCount == 0) {
       throw NoteNotFoundException();
     } else {
@@ -186,6 +198,7 @@ class NotesService {
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       noteTable,
+      limit: 1,
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -235,6 +248,29 @@ class NotesService {
       await db.close();
     }
   }
+
+  Future<void> _cacheNotes() async {
+    final allNotes = await getAllNotes();
+    _notes = allNotes.toList();
+    _notesStreamController.add(_notes);
+  }
+
+  Future<void> _ensureDbIsOpen() async {
+    try {
+      await open();
+    } on DatabaseAlreadyOpenException catch (_) {
+      //empty
+    }
+  }
+
+  Database _getDatabaseOrThrow() {
+    final db = _db;
+    if (db == null) {
+      throw DatabaseNotOpenException();
+    } else {
+      return db;
+    }
+  }
 }
 
 @immutable
@@ -243,9 +279,9 @@ class DatabaseUser {
   final String email;
   const DatabaseUser({required this.id, required this.email});
 
-  DatabaseUser.fromRow(Map<String, Object?> map)
-      : id = map[idColumn] as int,
-        email = [emailColumn] as String;
+  DatabaseUser.fromRow(Map<String, Object?> queryRow)
+      : id = queryRow[idColumn] as int,
+        email = queryRow[emailColumn] as String;
 
   @override
   String toString() => 'Person, ID=$id, email = $email';
@@ -270,12 +306,12 @@ class DatabaseNote {
     required this.isSyncedWithCloud,
   });
 
-  DatabaseNote.fromRow(Map<String, Object?> map)
-      : id = map[idColumn] as int,
-        userId = [userIdColumn] as int,
-        text = map[textColumn] as String,
+  DatabaseNote.fromRow(Map<String, Object?> queryRow)
+      : id = queryRow[idColumn] as int,
+        userId = queryRow[userIdColumn] as int,
+        text = queryRow[textColumn] as String,
         isSyncedWithCloud =
-            (map[isSyncedWithCloudColumn] as int) == 1 ? true : false;
+            (queryRow[isSyncedWithCloudColumn] as int) == 1 ? true : false;
 
   @override
   String toString() =>

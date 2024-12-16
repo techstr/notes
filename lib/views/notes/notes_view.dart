@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notes/constants/routes.dart';
 import 'package:notes/services/auth/auth_service.dart';
 import 'package:notes/services/crud/notes_service.dart';
-
-import '../enums/menu_action.dart';
+import 'package:notes/enums/menu_action.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -19,7 +18,6 @@ class _NotesViewState extends State<NotesView> {
   @override
   void initState() {
     _notesService = NotesService();
-    _notesService.open();
     super.initState();
   }
 
@@ -33,8 +31,13 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Notes'),
+          title: const Text('Your Notes'),
           actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(newNoteRoute);
+                },
+                icon: const Icon(Icons.add)),
             PopupMenuButton<MenuAction>(
               onSelected: (value) async {
                 switch (value) {
@@ -43,8 +46,10 @@ class _NotesViewState extends State<NotesView> {
                     if (shouldLogout) {
                       await AuthService.firebase().logout();
                       if (context.mounted) {
-                        Navigator.of(context)
-                            .pushNamedAndRemoveUntil(loginRoute, (_) => false);
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          loginRoute,
+                          (_) => false,
+                        );
                       }
                     }
                 }
@@ -59,7 +64,10 @@ class _NotesViewState extends State<NotesView> {
           ],
         ),
         body: FutureBuilder(
-          future: _notesService.getOrCreateUser(email: userEmail),
+          future: _notesService.getOrCreateUser(
+            email: userEmail,
+            setAsCurrentUser: true,
+          ),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
@@ -69,6 +77,8 @@ class _NotesViewState extends State<NotesView> {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return const Text("Waiting for all the notes...");
+                      case ConnectionState.active:
+                        return const Text("Notes are available");
                       default:
                         return const CircularProgressIndicator();
                     }
