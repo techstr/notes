@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:notes/extensions/list/filter.dart';
+import 'package:notes/extensions/filter.dart';
 import 'package:notes/services/crud/constants.dart';
 import 'package:notes/services/crud/crud_exception.dart';
 import 'package:sqflite/sqflite.dart';
