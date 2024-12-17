@@ -171,7 +171,6 @@ class NotesService {
   }) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
-    await getNote(id: note.id);
 
     final updateCount = await db.update(
       noteTable,
@@ -203,7 +202,7 @@ class NotesService {
       whereArgs: [id],
     );
 
-    if (results.isNotEmpty) {
+    if (results.isEmpty) {
       throw NoteNotFoundException();
     } else {
       final note = DatabaseNote.fromRow(results.first);

@@ -49,15 +49,14 @@ class _NewNoteViewState extends State<NewNoteView> {
 
   void _textControllerListener() async {
     final note = _note;
-    if (note == null) {
-      return;
-    }
-
     final text = _textController.text;
-    await _notesService.updateNote(
-      note: note,
-      text: text,
-    );
+
+    if (text.isNotEmpty && _note != null) {
+      await _notesService.updateNote(
+        note: note!,
+        text: text,
+      );
+    }
   }
 
   void _setupTextControllerListener() {
