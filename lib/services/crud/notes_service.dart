@@ -122,7 +122,7 @@ class NotesService {
       whereArgs: [id],
     );
 
-    if (deletedCount >= 1) {
+    if (deletedCount == 0) {
       throw NoteNotFoundException();
     } else {
       _notes.removeWhere((note) => note.id == id);

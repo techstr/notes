@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notes/constants/routes.dart';
 import 'package:notes/services/auth/auth_exceptions.dart';
 import 'package:notes/services/auth/auth_service.dart';
-import 'package:notes/utilities/show_error_dialog.dart';
+import 'package:notes/utilities/dialogs/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -65,13 +65,25 @@ class _RegisterViewState extends State<RegisterView> {
                     Navigator.of(context).pushNamed(verifyEmailRoute);
                   }
                 } on WeakPasswordAuthException catch (_) {
-                  await showErrorDialog(context, "Weak password entered!");
+                  await showErrorDialog(
+                    context: context,
+                    text: "Weak password entered!",
+                  );
                 } on EmailAlreadyInUseAuthException catch (_) {
-                  await showErrorDialog(context, "Email Already in Use!");
+                  await showErrorDialog(
+                    context: context,
+                    text: "Email Already in Use!",
+                  );
                 } on InvalidEmailAuthException catch (_) {
-                  await showErrorDialog(context, "Invalid Email Entered!");
+                  await showErrorDialog(
+                    context: context,
+                    text: "Invalid Email Entered!",
+                  );
                 } on GenericAuthExceptions catch (_) {
-                  await showErrorDialog(context, "Something went wrong!");
+                  await showErrorDialog(
+                    context: context,
+                    text: "Something went wrong!",
+                  );
                 }
               },
               child: const Text("Register")),
