@@ -6,10 +6,11 @@ import 'package:notes/services/auth/bloc/auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(AuthProvider provider) : super(const AuthStateLoading()) {
     on<AuthEventInitialize>((event, emit) async {
+      emit(const AuthStateLoading());
       await provider.initialize();
       final user = provider.currentUser;
       if (user == null) {
-        emit(const AuthStateLoggedOut());
+        emit(const AuthStateLoggedOut(null));
       } else if (!user.isEmailVerified) {
         emit(AuthStateNeedVerification(user));
       } else {
@@ -17,7 +18,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
     on<AuthEventSignIn>((event, emit) async {
-      emit(const AuthStateLoading());
       try {
         final user = await provider.login(
           email: event.email,
@@ -29,20 +29,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthStateAuthenticated(user));
         }
       } on Exception catch (e) {
-        emit(AuthStateError(e));
+        emit(AuthStateLoggedOut(e));
       }
     });
     on<AuthEventSignOut>((event, emit) async {
-      emit(const AuthStateLoading());
       try {
         await provider.logout();
       } on Exception catch (e) {
-        emit(AuthStateError(e));
+        emit(AuthStateLoggedOut(e));
       }
-      emit(const AuthStateLoggedOut());
+      emit(const AuthStateLoggedOut(null));
     });
     on<AuthEventSignUp>((event, emit) async {
-      emit(const AuthStateLoading());
       try {
         final user = await provider.createUser(
           email: event.email,
@@ -51,7 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await provider.sendEmailVerification();
         emit(AuthStateNeedVerification(user));
       } on Exception catch (e) {
-        emit(AuthStateError(e));
+        emit(AuthStateLoggedOut(e));
       }
     });
   }

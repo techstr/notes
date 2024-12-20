@@ -24,11 +24,7 @@ class AuthStateLoading extends AuthState {
   const AuthStateLoading();
 }
 
-class AuthStateError extends AuthState {
-  final Exception exception;
-  const AuthStateError(this.exception);
-}
-
 class AuthStateLoggedOut extends AuthState {
-  const AuthStateLoggedOut();
+  final Exception? exception;
+  const AuthStateLoggedOut(this.exception);
 }
