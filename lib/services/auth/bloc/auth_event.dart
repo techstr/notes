@@ -28,3 +28,7 @@ class AuthEventSignUp extends AuthEvent {
 class AuthEventVerifyEmail extends AuthEvent {
   const AuthEventVerifyEmail();
 }
+
+class AuthEventShouldSignUp extends AuthEvent {
+  const AuthEventShouldSignUp();
+}
