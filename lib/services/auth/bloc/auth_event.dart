@@ -32,3 +32,8 @@ class AuthEventVerifyEmail extends AuthEvent {
 class AuthEventShouldSignUp extends AuthEvent {
   const AuthEventShouldSignUp();
 }
+
+class AuthEventForgotPassword extends AuthEvent {
+  final String email;
+  const AuthEventForgotPassword({required this.email});
+}

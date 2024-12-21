@@ -60,6 +60,22 @@ void main() {
       final user = provider.currentUser;
       expect(user, isNotNull);
     });
+
+    test('Should be able to reset password', () async {
+      expect(
+          () async =>
+              await provider.sendPasswordResetEmail(email: 'foo@bar.com'),
+          returnsNormally);
+
+      expect(
+          () async => await provider.sendPasswordResetEmail(
+              email: 'user-not-found@bar.com'),
+          throwsA(isA<UserNotFoundAuthException>()));
+
+      expect(
+          () async => await provider.sendPasswordResetEmail(email: 'foo.bar'),
+          throwsA(isA<InvalidEmailAuthException>()));
+    });
   });
 }
 
@@ -123,5 +139,15 @@ class MockAuthProvider implements AuthProvider {
       isEmailVerified: true,
       id: 'my_id',
     );
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    await Future.delayed(const Duration(seconds: 1));
+    if (email == 'foo.bar') {
+      throw InvalidEmailAuthException();
+    } else if (email == 'user-not-found@bar.com') {
+      throw UserNotFoundAuthException();
+    }
   }
 }
