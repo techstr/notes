@@ -19,7 +19,7 @@ class AuthStateUnInitialized extends AuthState {
 class AuthStateRegistering extends AuthState {
   final Exception? exception;
   const AuthStateRegistering(
-      {required super.isLoading, required this.exception});
+      {required super.isLoading, required this.exception, super.loadingText});
 }
 
 class AuthStateUnauthenticated extends AuthState {

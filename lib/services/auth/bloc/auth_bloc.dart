@@ -20,13 +20,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<AuthEventSignIn>((event, emit) async {
+      emit(const AuthStateLoggedOut(
+          exception: null,
+          isLoading: true,
+          loadingText: 'Please wait while logging in..'));
       try {
         final user = await provider.login(
           email: event.email,
           password: event.password,
         );
         if (!user.isEmailVerified) {
-          emit(const AuthStateLoggedOut(exception: null, isLoading: true));
           emit(const AuthStateNeedVerification(isLoading: false));
         } else {
           emit(AuthStateAuthenticated(user: user, isLoading: false));
@@ -51,6 +54,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<AuthEventSignUp>((event, emit) async {
+      emit(const AuthStateRegistering(
+          exception: null,
+          isLoading: true,
+          loadingText: 'Please wait while registering..'));
       try {
         await provider.createUser(
           email: event.email,
@@ -68,6 +75,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<AuthEventVerifyEmail>((event, emit) async {
+      emit(const AuthStateNeedVerification(isLoading: true));
       await provider.sendEmailVerification();
       emit(const AuthStateNeedVerification(isLoading: false));
     });
