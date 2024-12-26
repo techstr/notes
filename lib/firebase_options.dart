@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -65,4 +56,32 @@ class DefaultFirebaseOptions {
     storageBucket: 'iprasad-notes-flutter-firebase.firebasestorage.app',
     iosBundleId: 'com.iprasad.notes',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDgOzji3-LmueZHe7o4qbb8s13kJi6UIB0',
+    appId: '1:139160455468:web:885a416c748ec0be640489',
+    messagingSenderId: '139160455468',
+    projectId: 'iprasad-notes-flutter-firebase',
+    authDomain: 'iprasad-notes-flutter-firebase.firebaseapp.com',
+    storageBucket: 'iprasad-notes-flutter-firebase.firebasestorage.app',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBRnD8t_G1tfuN756FNf8xNJvG3LnV9pbw',
+    appId: '1:139160455468:ios:1fd8fb9baa1ca04b640489',
+    messagingSenderId: '139160455468',
+    projectId: 'iprasad-notes-flutter-firebase',
+    storageBucket: 'iprasad-notes-flutter-firebase.firebasestorage.app',
+    iosBundleId: 'com.iprasad.notes',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDgOzji3-LmueZHe7o4qbb8s13kJi6UIB0',
+    appId: '1:139160455468:web:3cf0747a14dd10a6640489',
+    messagingSenderId: '139160455468',
+    projectId: 'iprasad-notes-flutter-firebase',
+    authDomain: 'iprasad-notes-flutter-firebase.firebaseapp.com',
+    storageBucket: 'iprasad-notes-flutter-firebase.firebasestorage.app',
+  );
+
 }
